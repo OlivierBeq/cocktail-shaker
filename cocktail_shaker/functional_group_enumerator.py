@@ -12,7 +12,7 @@ import ruamel.yaml as yaml
 
 # Relative Imports
 # ----------------
-from validation import RaiseMoleculeError
+from cocktail_shaker.validation import RaiseMoleculeError
 
 # Load datasources
 # ----------------
