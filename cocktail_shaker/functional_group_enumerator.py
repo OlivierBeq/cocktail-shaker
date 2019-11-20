@@ -6,6 +6,7 @@
 
 # Imports
 # ---------
+from os.path import join
 from rdkit import Chem
 import ruamel.yaml as yaml
 
@@ -26,7 +27,7 @@ def load_datasources():
     """
     from pathlib import Path
     datasource_location = Path(__file__).absolute().parent
-    with open(str(datasource_location) + "/datasources/R_Groups.yaml") as stream:
+    with open(join(str(datasource_location), "datasources", "R_Groups.yaml")) as stream:
         try:
             global R_GROUP_DATASOURCE
             R_GROUP_DATASOURCE = yaml.safe_load(stream)
@@ -234,17 +235,14 @@ class Cocktail(object):
 
         enumerated_molecules = []
         for molecule in self.modified_molecules:
-            for i in range(complexity):
-                smiles_enumerated = Chem.MolToSmiles(molecule, doRandom=True)
-                if dimensionality == '1D' and smiles_enumerated not in enumerated_molecules:
+            if dimensionality == '1D' and smiles_enumerated not in enumerated_molecules:
+                for i in range(complexity):
                     enumerated_molecules.append(smiles_enumerated)
-                elif dimensionality == '2D':
-                    if not smiles_enumerated in enumerated_molecules:
-                        enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
-                elif dimensionality == '3D':
-                    print ('3D Functionality is not supported yet!')
-                    return enumerated_molecules
-
+            elif dimensionality == '2D' and smiles_enumerated not in enumerated_molecules:
+                    enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
+            elif dimensionality == '3D' and smiles_enumerated not in enumerated_molecules:
+                    Chem.rdDistGeom.EmbedMolecule(Chem.MolFromSmiles(smiles_enumerated), 
+                    enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
         return enumerated_molecules
 
 
