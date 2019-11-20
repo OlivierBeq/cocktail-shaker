@@ -241,7 +241,7 @@ class Cocktail(object):
             elif dimensionality == '2D' and smiles_enumerated not in enumerated_molecules:
                     enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
             elif dimensionality == '3D' and smiles_enumerated not in enumerated_molecules:
-                    Chem.rdDistGeom.EmbedMolecule(Chem.MolFromSmiles(smiles_enumerated), 
+                    Chem.rdDistGeom.EmbedMolecule(Chem.MolFromSmiles(smiles_enumerated), Chem.rdDistGeom.ETKDGv2())
                     enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
         return enumerated_molecules
 
