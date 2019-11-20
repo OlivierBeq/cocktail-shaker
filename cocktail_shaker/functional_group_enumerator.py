@@ -208,7 +208,7 @@ class Cocktail(object):
 
         return modified_molecules
     
-    def validate(self, sanitizeFlags=Chem.rdmolops.SanitizeFlags.SANITIZE_ALL):
+    def sanitize(self, sanitizeFlags=Chem.rdmolops.SanitizeFlags.SANITIZE_ALL):
         
         """
 
