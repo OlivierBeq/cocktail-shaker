@@ -224,7 +224,7 @@ class Cocktail(object):
         """
 
         return [mol for mol in set(self.modified_molecules) \
-                if Chem.SanitizeMol(x, sanitizeOps=sanitizeFlags, catchErrors=True) == Chem.rdmolops.SanitizeFlags.SANITIZE_NONE]
+                if Chem.SanitizeMol(mol, sanitizeOps=sanitizeFlags, catchErrors=True) == Chem.rdmolops.SanitizeFlags.SANITIZE_NONE]
     
     def enumerate(self, enumeration_complexity='1D', dimensionality=None):
 
