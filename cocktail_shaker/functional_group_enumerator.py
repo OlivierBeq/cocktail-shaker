@@ -76,59 +76,66 @@ class Cocktail(object):
     __version_parser__ = 1.0
     __allow_update__ = False
 
-    def __init__(self, peptide_backbone, ligand_library = [], dimensionality = '1D', enumeration_complexity='Low'):
+    def __init__(self, molecules):
 
         # imports
         # -------
         import re
-        from rdkit import Chem
         from molvs import Validator
 
         # I will allow the user to pass a string but for easier sake down the road
         # I will reimplement it as a list.
 
         load_datasources()
-        self.peptide_backbone = peptide_backbone
-        self.ligand_library = ligand_library
+        rdkit_rendered_molecules = []
+        self.markush_structure = False
+        for molecule in molecules:
+            if 'R1' in molecule:
+                molecule = molecule.replace('R1', '[*:1]', 1)
+                self.markush_structure = True
+            elif 'R' in molecule:
+                molecule = molecule.replace('R', '[*:1]', 1)
+                self.markush_structure = True
 
-        # Guardrail for combinations
-        # max_number_side_chains = [character for character in re.split("[^0-9]", self.peptide_backbone) if character != '']
-        # if int(max(map(int, max_number_side_chains))) != len(self.ligand_library):
-        #     print ("Ligand Library must match the amount of Side Chains")
-        #     raise IndexError
+        rdkit_rendered_molecules.append(Chem.MolFromSmiles(molecule))
 
-        self.dimensionality = dimensionality
-        self.enumeration_complexity = enumeration_complexity
+        self.molecules = rdkit_rendered_molecules
+        
+        for molecule in self.molecules:
+            self.original_smiles = Chem.MolToSmiles(molecule)
+            # Validation
+            validator_format = '%(asctime)s - %(levelname)s - %(validation)s - %(message)s'
+            self.validate = Validator(log_format=validator_format)
 
-    def shake(self):
+    def detect_functional_groups(self):
 
         """
 
-        Generate all combinations of a molecule
+        Find functional groups that ligand library loader supports
+
+        :return:
 
         """
 
-        results = []
-        peptide = self.peptide_backbone
-        import itertools
-        combinations = (list(itertools.permutations(self.ligand_library)))
-        print (combinations)
+        pattern_payload = {}
+        load_datasources()
 
-        for combination in combinations:
-            combination = list(combination)
-            peptide_molecule = ''
-            for j in range(0, len(self.ligand_library)):
-                if j == 0:
-                    peptide_molecule = str(peptide).replace('[*:' + str(j + 1) +']', combination[j])
-                else:
-                    peptide_molecule = str(peptide_molecule).replace('[*:' + str(j + 1) +']', combination[j])
-            results.append(peptide_molecule)
+        print ("Detecting Functional Groups...")
 
-        print (results)
-        return results
+        for molecule in self.molecules:
+            for functional_group, pattern in R_GROUPS.items():
+                for i in range(0, len(pattern)):
+                    for key, value in pattern[i].items():
+                        smart_pattern = Chem.MolFromSmarts(value[1])
+                        if molecule.GetSubstructMatches(smart_pattern,uniquify=False):
+                            print ("Found Functional Group: %s | Pattern Count: %s" % (key,
+                                                                                       len(molecule.GetSubstructMatches(
+                                                                                           smart_pattern,uniquify=False))))
+                        pattern_payload[key] = [value[0], value[1]]
 
+        return pattern_payload
 
-    def _shake(self, functional_groups=["all"], shape=None):
+    def shake(self, functional_groups=["all"], shape=None):
 
         """
 
@@ -201,7 +208,7 @@ class Cocktail(object):
 
         return modified_molecules
 
-    def enumerate(self, enumeration_complexity=None, dimensionality=None):
+    def enumerate(self, enumeration_complexity='1D', dimensionality=None):
 
         """
 
