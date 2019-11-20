@@ -100,6 +100,9 @@ class Cocktail(object):
         rdkit_rendered_molecules.append(Chem.MolFromSmiles(molecule))
 
         self.molecules = rdkit_rendered_molecules
+        self.sanitized_molecules = []
+        self.modified_molecules = []
+        self.enumerated_molecules = []
         
         for molecule in self.molecules:
             self.original_smiles = Chem.MolToSmiles(molecule)
@@ -152,7 +155,10 @@ class Cocktail(object):
         """
 
         # Run detection first to see and validate what functional groups have been found.
-
+        
+        if len(self.modified_molecules) > 0:
+            return self.modified_molecules
+        
         patterns_found = self.detect_functional_groups()
         print ("Shaking Compound....")
         modified_molecules = []
@@ -222,9 +228,14 @@ class Cocktail(object):
         Return:
             modified_molecules (List): List of the RDKit molecule objects that have had their structures replaced.
         """
-
-        return [mol for mol in set(self.modified_molecules) \
+        
+        if len(self.sanitized_molecules) > 0:
+            return self.sanitized_molecules
+        
+        self.sanitized_molecules = [mol for mol in set(self.modified_molecules) \
                 if Chem.SanitizeMol(mol, sanitizeOps=sanitizeFlags, catchErrors=True) == Chem.rdmolops.SanitizeFlags.SANITIZE_NONE]
+        
+        return self.sanitized_molecules
     
     def enumerate(self, enumeration_complexity='1D', dimensionality=None):
 
@@ -246,7 +257,10 @@ class Cocktail(object):
 
         # Enumeration comes from the user iwatobipen
         # https://iwatobipen.wordpress.com/2018/11/15/generate-possible-list-of-smlies-with-rdkit-rdkit/
-
+        
+        if len(self.enumerated_molecules) > 0:
+            return self.enumerated_molecules
+        
         print ("Enumerating Compunds....")
 
         if enumeration_complexity.lower() == 'low':
@@ -257,18 +271,18 @@ class Cocktail(object):
             complexity = 1000
         else:
             complexity = 10
-
-        enumerated_molecules = []
+            
         for molecule in self.modified_molecules:
             if dimensionality == '1D' and smiles_enumerated not in enumerated_molecules:
                 for i in range(complexity):
-                    enumerated_molecules.append(smiles_enumerated)
+                    self.enumerated_molecules.append(smiles_enumerated)
             elif dimensionality == '2D' and smiles_enumerated not in enumerated_molecules:
-                    enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
+                    self.enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
             elif dimensionality == '3D' and smiles_enumerated not in enumerated_molecules:
                     Chem.rdDistGeom.EmbedMolecule(Chem.MolFromSmiles(smiles_enumerated), Chem.rdDistGeom.ETKDGv2())
-                    enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
-        return enumerated_molecules
+                    self.enumerated_molecules.append(Chem.MolFromSmiles(smiles_enumerated))
+        
+        return self.enumerated_molecules
 
 
 
