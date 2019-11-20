@@ -223,7 +223,7 @@ class Cocktail(object):
             modified_molecules (List): List of the RDKit molecule objects that have had their structures replaced.
         """
 
-        return [mol for mol in self.modified_molecules \
+        return [mol for mol in set(self.modified_molecules) \
                 if Chem.SanitizeMol(x, sanitizeOps=sanitizeFlags catchErrors=True) == Chem.rdmolops.SanitizeFlags.SANITIZE_NONE]
     
     def enumerate(self, enumeration_complexity='1D', dimensionality=None):
