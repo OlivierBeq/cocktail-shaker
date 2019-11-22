@@ -96,8 +96,7 @@ class Cocktail(object):
             elif 'R' in molecule:
                 molecule = molecule.replace('R', '[*:1]', 1)
                 self.markush_structure = True
-
-        rdkit_rendered_molecules.append(Chem.MolFromSmiles(molecule))
+            rdkit_rendered_molecules.append(Chem.MolFromSmiles(molecule))
 
         self.molecules = rdkit_rendered_molecules
         self.sanitized_molecules = []
