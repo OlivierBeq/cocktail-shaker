@@ -1,1 +1,2 @@
 include README.md requirements.in requirements.txt
+include cocktail_shaker/datasources/*.yaml
