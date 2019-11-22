@@ -42,6 +42,7 @@ setup(
     author_email="sharifsuliman1@gmail.com",
     url="https://www.github.com/Sulstice/Cocktail-Shaker",
     install_requires=REQUIREMENTS,
+    install_package_data=True,
     long_description=long_description,
     long_description_content_type='text/markdown',
     zip_safe=False,
