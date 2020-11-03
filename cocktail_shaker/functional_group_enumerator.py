@@ -76,7 +76,7 @@ class Cocktail(object):
     __version_parser__ = 1.0
     __allow_update__ = False
 
-    def __init__(self, molecules):
+    def __init__(self, molecules, print_messages=False):
 
         # imports
         # -------
@@ -102,6 +102,7 @@ class Cocktail(object):
         self.sanitized_molecules = []
         self.modified_molecules = []
         self.enumerated_molecules = []
+        self.print = print_messages
         
         for molecule in self.molecules:
             self.original_smiles = Chem.MolToSmiles(molecule)
@@ -122,14 +123,15 @@ class Cocktail(object):
         pattern_payload = {}
         load_datasources()
 
-        print ("Detecting Functional Groups...")
+        if self.print:
+            print ("Detecting Functional Groups...")
 
         for molecule in self.molecules:
             for functional_group, pattern in R_GROUPS.items():
                 for i in range(0, len(pattern)):
                     for key, value in pattern[i].items():
                         smart_pattern = Chem.MolFromSmarts(value[1])
-                        if molecule.GetSubstructMatches(smart_pattern,uniquify=False):
+                        if self.print and molecule.GetSubstructMatches(smart_pattern,uniquify=False):
                             print ("Found Functional Group: %s | Pattern Count: %s" % (key,
                                                                                        len(molecule.GetSubstructMatches(
                                                                                            smart_pattern,uniquify=False))))
@@ -159,7 +161,8 @@ class Cocktail(object):
             return self.modified_molecules
         
         patterns_found = self.detect_functional_groups()
-        print ("Shaking Compound....")
+        if self.print:
+            print ("Shaking Compound....")
         modified_molecules = []
         if functional_groups[0] == 'all':
             for molecule in self.molecules:
@@ -209,7 +212,8 @@ class Cocktail(object):
                                     print ("Molecule Formed is not possible")
         self.modified_molecules = modified_molecules
 
-        print ("Molecules Generated: {}".format(len(modified_molecules)))
+        if self.print:
+            print ("Molecules Generated: {}".format(len(modified_molecules)))
 
         return modified_molecules
     
@@ -260,7 +264,8 @@ class Cocktail(object):
         if len(self.enumerated_molecules) > 0:
             return self.enumerated_molecules
         
-        print ("Enumerating Compunds....")
+        if self.print:
+            print ("Enumerating Compunds....")
 
         if enumeration_complexity.lower() == 'low':
             complexity = 10
